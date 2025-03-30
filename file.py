@@ -1,29 +1,32 @@
 import os
+
 '''
-This recursively gives me files present in subdirectories
-but in a single list and not in nested dictionary
+This function recursively retrieves all files in a directory and 
+stores them in a nested dictionary structure, where subdirectories 
+are represented as nested dictionaries.
 '''
-def get_file_properties(folder_path):
-    files_info = []
-    for root, _, files in os.walk(folder_path): #recursively gives all files
+
+def recursive_dictionary(path='.'):  # Default path is the current directory
+    main_dir = {}  # Dictionary to store file structure
+
+    for root, _, files in os.walk(path):  # Recursively traverse all directories
+        sub_dir = main_dir  # Reference to the main dictionary
+
+        # Process subdirectories by extracting the relative path
+        for part in root[len(path):].strip(os.sep).split(os.sep):  
+            sub_dir = sub_dir.setdefault(part, {})  # Create new nested dict for each subdir
         
+        # Store file details in the corresponding directory
         for file_name in files:
-            file_path = os.path.join(root, file_name) #get full file path 
-
-            file_info = {
-                "name": file_name,
-                "size": os.path.getsize(file_path)
+            file_path = os.path.join(root, file_name)  # Get full file path
+            sub_dir[file_name] = {  # Add file properties to the current subdir
+                'name': file_name,
+                'size': os.path.getsize(file_path)  # File size in bytes
             }
-            files_info.append(file_info)
 
-    return files_info
-
-# Testing the function with a specific directory or leaving it empty for the current one
+    return main_dir
 
 # Get folder path from user input
 folder_path = input("Enter folder path: ").strip()
-
-# Fetch and display file properties
-file_list = get_file_properties(folder_path)
-for file in file_list:
-    print(file)
+nested_dict = recursive_dictionary(folder_path)
+print(nested_dict)
